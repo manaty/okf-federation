@@ -1,0 +1,35 @@
+federation: "0.1"
+id: okf-federation-project
+root: okf-federation
+
+members:
+  - id: okf-federation
+    repository: https://github.com/manaty/okf-federation
+    ref: main
+    bundle: .
+    entrypoint: index.md
+    workspace_path: .
+    enforcement: required
+
+roles:
+  project-maintainers:
+    resolver:
+      kind: literal
+      members: [human:smichea]
+
+authority:
+  default_member_scope: member
+  arbiter_role: project-maintainers
+  canonical_scopes:
+    - id: project-specification
+      member: okf-federation
+      paths: ["**"]
+
+review_policies:
+  self_approval: forbidden
+  rules:
+    - id: project-review
+      members: [okf-federation]
+      approvals:
+        - role: project-maintainers
+          minimum: 1

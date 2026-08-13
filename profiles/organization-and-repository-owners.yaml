@@ -1,0 +1,49 @@
+# Informative profile. Copy and replace resolver values for an organization.
+roles:
+  organization-maintainers:
+    resolver:
+      kind: github-team
+      value: acme/knowledge-maintainers
+  repository-maintainers:
+    resolver:
+      kind: repository-maintainers
+
+authority:
+  default_member_scope: member
+  canonical_scopes:
+    - id: organization-policy
+      member: home
+      paths: [org/**, policies/**]
+      types: [Organization, Policy, Process]
+    - id: cross-system-architecture
+      member: home
+      paths: [architecture/**]
+      types: [Architecture, Decision]
+    - id: member-local
+      member: "$matched-member"
+      paths: ["**"]
+
+review_policies:
+  self_approval: forbidden
+  rules:
+    - id: root-review
+      members: [home]
+      approvals:
+        - role: organization-maintainers
+          minimum: 1
+    - id: member-review
+      members: ["*"]
+      except_members: [home]
+      approvals:
+        - role: repository-maintainers
+          minimum: 1
+
+freshness_policies:
+  - id: operations-review
+    match: { types: [Operations, Runbook] }
+    maximum_verification_age: 30d
+    minimum_trust: machine-confirmed
+  - id: policy-review
+    match: { types: [Policy, Process] }
+    maximum_verification_age: 365d
+    minimum_trust: human-reviewed

@@ -1,0 +1,65 @@
+federation: "0.1"
+id: acme-engineering
+root: home
+
+members:
+  - id: home
+    repository: https://github.com/acme/home
+    ref: main
+    bundle: .
+    entrypoint: index.md
+    workspace_path: home
+    enforcement: required
+  - id: service-a
+    repository: https://github.com/acme/service-a
+    ref: main
+    bundle: .
+    entrypoint: index.md
+    workspace_path: service-a
+    enforcement: required
+
+roles:
+  organization-maintainers:
+    resolver:
+      kind: literal
+      members: [human:org-maintainer]
+  repository-maintainers:
+    resolver:
+      kind: repository-maintainers
+
+authority:
+  default_member_scope: member
+  arbiter_role: organization-maintainers
+  canonical_scopes:
+    - id: organization-policy
+      member: home
+      paths: [org/**]
+      types: [Policy, Process]
+    - id: member-local
+      member: "$matched-member"
+      paths: ["**"]
+
+review_policies:
+  self_approval: forbidden
+  rules:
+    - id: root-review
+      members: [home]
+      approvals:
+        - role: organization-maintainers
+          minimum: 1
+    - id: member-review
+      members: ["*"]
+      except_members: [home]
+      approvals:
+        - role: repository-maintainers
+          minimum: 1
+
+freshness_policies:
+  - id: process-review
+    match:
+      members: [home]
+      types: [Process]
+    maximum_verification_age: 365d
+    minimum_trust: human-reviewed
+    require_stale_after: true
+    stale_severity: error
