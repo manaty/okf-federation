@@ -242,7 +242,7 @@ def validate_local_links(path: Path, text: str, bundle: Path, member: str, repor
         if not resolved.exists():
             report.add(
                 "LINK_BROKEN",
-                "error",
+                "warning",
                 f"Local link target does not exist: {raw_target}",
                 member,
                 str(path.relative_to(bundle)),

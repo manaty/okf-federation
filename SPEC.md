@@ -316,7 +316,9 @@ A Level 2 validator **MUST** check:
 The core OKF specification tolerates broken links. A federation MAY make a
 subset blocking because those links are its discovery and authority graph.
 Links declared canonical by the manifest are always blocking for `required`
-members.
+members. The `0.1` manifest does not yet declare individual canonical links,
+so the reference validator reports ordinary broken Markdown links as warnings.
+It continues to reject links that escape a bundle boundary.
 
 Validators **MUST** produce machine-readable results with a stable code,
 severity, member, path, and human-readable explanation. Severity is one of
