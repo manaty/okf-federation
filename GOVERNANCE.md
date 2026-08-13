@@ -38,6 +38,25 @@ must not be the sole approver of a normative change. Before `1.0`, this file
 will be revised to identify named maintainers, a voting or consensus process,
 appeals, and release signing.
 
+### Maintainer bypass
+
+Repository rules may grant a named maintainer a bypass for continuity. The
+bypass is an operational exception, not an alternative decision process.
+
+A bypass:
+
+- MAY be used for editorial or non-normative changes after required CI passes;
+- MAY be used to recover from an incident when waiting for the normal review
+  path would materially extend the incident;
+- MUST include the reason in the pull request record;
+- MUST preserve an auditable pull request and passing required checks whenever
+  the hosting platform permits it; and
+- MUST NOT make the proposer the sole approver of a normative change.
+
+Any use outside these conditions is a governance violation and should be
+reviewed after the fact. Repeated incident bypasses should result in a process
+or maintainer-coverage change rather than becoming the normal merge path.
+
 ## Releases
 
 Releases are tagged. Each release records:
