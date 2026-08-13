@@ -3,8 +3,10 @@ from __future__ import annotations
 from datetime import date
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 
 
@@ -42,6 +44,26 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn("AUTHORITY_SCOPE_ID_DUPLICATE", result.stdout)
         self.assertIn("AUTHORITY_SCOPE_CONFLICT", result.stdout)
         self.assertIn("AUTHORITY_MEMBER_UNKNOWN", result.stdout)
+
+    def test_broken_local_link_is_advisory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / "workspace"
+            shutil.copytree(WORKSPACE, workspace)
+            entrypoint = workspace / "service-a" / "index.md"
+            entrypoint.write_text(
+                entrypoint.read_text(encoding="utf-8")
+                + "\n- [Planned documentation](planned.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_validator(
+                workspace / "home" / "federation.yaml",
+                "--workspace",
+                workspace,
+                "--today",
+                date(2026, 8, 13),
+            )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("WARNING LINK_BROKEN", result.stdout)
 
     def test_json_output_has_stable_envelope(self) -> None:
         result = self.run_validator(
