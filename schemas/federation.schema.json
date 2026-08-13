@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/manaty/okf-federation/blob/main/schemas/federation.schema.json",
+  "title": "OKF Federation manifest",
+  "type": "object",
+  "required": ["federation", "id", "root", "members"],
+  "properties": {
+    "federation": { "const": "0.1" },
+    "id": { "$ref": "#/$defs/id" },
+    "root": { "$ref": "#/$defs/id" },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/member" }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/role" }
+    },
+    "authority": { "$ref": "#/$defs/authority" },
+    "review_policies": { "$ref": "#/$defs/reviewPolicies" },
+    "freshness_policies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/freshnessPolicy" }
+    },
+    "extensions": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "not": { "pattern": "(^/|(^|/)\\.\\.(/|$))" }
+    },
+    "member": {
+      "type": "object",
+      "required": ["id", "repository", "ref", "bundle", "entrypoint", "enforcement"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "repository": { "type": "string", "format": "uri" },
+        "ref": { "type": "string", "minLength": 1 },
+        "bundle": { "$ref": "#/$defs/relativePath" },
+        "entrypoint": { "$ref": "#/$defs/relativePath" },
+        "workspace_path": { "$ref": "#/$defs/relativePath" },
+        "enforcement": { "enum": ["required", "advisory", "migrating"] },
+        "migration": {
+          "type": "object",
+          "required": ["owner", "target_date"],
+          "properties": {
+            "owner": { "type": "string", "minLength": 1 },
+            "target_date": { "type": "string", "format": "date" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "enforcement": { "const": "migrating" } } },
+          "then": { "required": ["migration"] }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "resolver": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["literal", "github-team", "gitlab-group", "codeowners", "repository-maintainers", "external"]
+        },
+        "value": { "type": "string" },
+        "members": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "role": {
+      "type": "object",
+      "required": ["resolver"],
+      "properties": { "resolver": { "$ref": "#/$defs/resolver" } },
+      "additionalProperties": false
+    },
+    "canonicalScope": {
+      "type": "object",
+      "required": ["id", "member", "paths"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "member": { "type": "string", "minLength": 1 },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "types": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["canonical_scopes"],
+      "properties": {
+        "default_member_scope": { "enum": ["member", "root", "none"] },
+        "canonical_scopes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/canonicalScope" },
+          "minItems": 1
+        },
+        "arbiter_role": { "$ref": "#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "required": ["role", "minimum"],
+      "properties": {
+        "role": { "$ref": "#/$defs/id" },
+        "minimum": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "reviewRule": {
+      "type": "object",
+      "required": ["id", "members", "approvals"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "members": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "except_members": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "approvals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/approval" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "reviewPolicies": {
+      "type": "object",
+      "required": ["self_approval", "rules"],
+      "properties": {
+        "self_approval": { "enum": ["forbidden", "allowed"] },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reviewRule" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "freshnessPolicy": {
+      "type": "object",
+      "required": ["id", "match"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "match": {
+          "type": "object",
+          "properties": {
+            "members": { "type": "array", "items": { "type": "string" } },
+            "paths": { "type": "array", "items": { "type": "string" } },
+            "types": { "type": "array", "items": { "type": "string" } },
+            "tags": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "maximum_verification_age": { "type": "string", "pattern": "^[1-9][0-9]*d$" },
+        "minimum_trust": { "enum": ["unverified", "machine-confirmed", "human-reviewed"] },
+        "require_stale_after": { "type": "boolean" },
+        "stale_severity": { "enum": ["warning", "error"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

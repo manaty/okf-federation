@@ -1,0 +1,19 @@
+federation: "0.1"
+id: invalid-duplicate-authority
+root: home
+members:
+  - id: home
+    repository: https://github.com/acme/home
+    ref: main
+    bundle: .
+    entrypoint: index.md
+    enforcement: required
+authority:
+  default_member_scope: member
+  canonical_scopes:
+    - id: duplicate
+      member: home
+      paths: ["**"]
+    - id: duplicate
+      member: another-member
+      paths: ["**"]
