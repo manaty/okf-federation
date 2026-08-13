@@ -29,4 +29,8 @@ jobs:
           examples/minimal/workspace/home/federation.yaml
           --workspace examples/minimal/workspace
           --today 2026-08-13
+      - run: >-
+          python scripts/validate_bundle.py
+          examples/minimal/workspace/service-a
+          --member service-a
       - run: python -m unittest discover -s tests -v

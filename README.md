@@ -49,8 +49,15 @@ python3 -m pip install -r requirements-dev.txt
 python3 scripts/validate.py federation.yaml --workspace .
 python3 scripts/validate.py examples/minimal/workspace/home/federation.yaml \
   --workspace examples/minimal/workspace --today 2026-08-13
+python3 scripts/validate_bundle.py examples/minimal/workspace/service-a \
+  --member service-a
 python3 -m unittest discover -s tests -v
 ```
+
+Member repositories can run `validate_bundle.py` in their own CI without
+checking out the root manifest or exposing a private federation registry. This
+is a structural bundle gate; federation authority, ownership, cross-member
+references, and freshness remain root-validator responsibilities.
 
 ## License
 

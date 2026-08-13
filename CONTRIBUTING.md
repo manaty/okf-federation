@@ -21,6 +21,8 @@ generated: { by: "human:manaty-maintainers", at: "2026-08-13T00:00:00Z" }
    python3 -m pip install -r requirements-dev.txt
    python3 scripts/validate.py examples/minimal/workspace/home/federation.yaml \
      --workspace examples/minimal/workspace --today 2026-08-13
+   python3 scripts/validate_bundle.py examples/minimal/workspace/service-a \
+     --member service-a
    python3 -m unittest discover -s tests -v
    ```
 
