@@ -19,6 +19,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCHEMA = PROJECT_ROOT / "schemas/federation.schema.json"
+# log.md is optional (history is Git); checked only when a bundle has one.
 RESERVED_MARKDOWN = {"index.md", "log.md"}
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 ISO_LOG_HEADING = re.compile(r"^## \d{4}-\d{2}-\d{2}$", re.MULTILINE)

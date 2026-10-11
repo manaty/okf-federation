@@ -23,4 +23,4 @@ okf_version: "0.2"
 
 * [Contributing](CONTRIBUTING.md) - How to propose specification and implementation changes.
 * [Security](SECURITY.md) - Security considerations and vulnerability reporting.
-* [Change log](log.md) - Significant updates to the proposal.
+* History - Git history and merged pull requests; this repository keeps no hand-written change log.

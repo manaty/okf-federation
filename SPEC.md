@@ -97,7 +97,10 @@ transport.
    at the member that owns them. The root links to them rather than copying
    editable prose.
 2. **Git history is the audit trail.** Canonical changes are versioned,
-   attributable, reviewable, and reversible.
+   attributable, reviewable, and reversible. A bundle's change history is its
+   Git history and its merged pull requests; a hand-written OKF `log.md` is
+   OPTIONAL and SHOULD NOT be required by a federation. When a bundle still
+   has one, validators keep checking it as OKF v0.2 does.
 3. **Agents propose; policy admits.** An agent MAY write a branch or proposal,
    but durable canon changes only through the declared review policy.
 4. **Indexes are derived.** Search indexes, graphs, catalogs, and summaries MAY
