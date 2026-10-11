@@ -108,6 +108,27 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("MEMBER_ENTRYPOINT_MISSING", result.stdout)
 
+    def test_member_bundle_without_log_is_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "knowledge"
+            shutil.copytree(WORKSPACE / "service-a", bundle)
+            (bundle / "log.md").unlink(missing_ok=True)
+            result = self.run_bundle_validator(bundle, "--member", "service-a")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("OKF_LOG", result.stdout)
+
+    def test_member_bundle_still_checks_an_existing_log(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "knowledge"
+            shutil.copytree(WORKSPACE / "service-a", bundle)
+            (bundle / "log.md").write_text("# Log\n\nNo dated entry.\n", encoding="utf-8")
+            result = self.run_bundle_validator(bundle, "--member", "service-a")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("OKF_LOG_DATE_MISSING", result.stdout)
+            (bundle / "log.md").write_text("# Log\n\n## 2026-08-13\n\n* Entry.\n", encoding="utf-8")
+            result = self.run_bundle_validator(bundle, "--member", "service-a")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_member_bundle_rejects_a_link_that_escapes_the_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             bundle = Path(directory) / "knowledge"
